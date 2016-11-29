@@ -77,6 +77,7 @@ namespace TheDashboard.Data
         public IEnumerable<LogItem> GetLatestLogItems()
         {
             var dtLogItemsSince = DateTime.Now.AddDays(-183);
+            var test = dtLogItemsSince.ToLongDateString();
 
             var logItems = new List<LogItem>();
 

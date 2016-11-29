@@ -18,6 +18,8 @@ using Action = umbraco.BusinessLogic.Actions.Action;
 
 namespace TheDashboard.Api
 {
+    using System.Collections.Generic;
+
     [IsBackOffice]
     [CamelCaseController]
     public class TheDashboardController : UmbracoAuthorizedJsonController
@@ -29,10 +31,29 @@ namespace TheDashboard.Api
             var dashboardViewModel = new DashboardViewModel();
 
             var unpublishedContent = umbracoRepository.GetUnpublishedContent().ToArray();
-            var logItems = umbracoRepository.GetLatestLogItems().ToArray();
+
+            var allLogItems = umbracoRepository.GetLatestLogItems().ToList();
+            IEnumerable<LogItem> selectedLogItems = null;
+
+            var lastMonthDate = DateTime.Now.AddMonths(-1);
+            var lastMonthLogItems = allLogItems.Where(n => n.Timestamp >= lastMonthDate).ToList();
+
+            if (lastMonthLogItems.Count() > 25)
+            {
+                selectedLogItems = lastMonthLogItems;
+            }
+            else
+            {
+                selectedLogItems = allLogItems.Take(25);
+            }
+
+            //var logItems = umbracoRepository.GetLatestLogItems().ToArray();
+            var logItems = selectedLogItems.ToArray();
             var nodesInRecyleBin = umbracoRepository.GetRecycleBinNodes().Select(x => x.Id).ToArray();
 
-            foreach (var logItem in logItems.Take(10))
+            
+
+            foreach (var logItem in logItems)
             {
                 var user = GetUser(logItem.UserId);
                 var contentNode = GetContent(logItem.NodeId);
